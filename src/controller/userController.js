@@ -17,6 +17,7 @@ exports.signup = async function (req, res, next) {
     const data = await validatePayload(req.body, true);
     const create = await prisma.user.create({ data });
     const accessToken = getToken(create);
+    create.accessToken = accessToken;
     delete create?.password;
     return res.json({
       data: create,
