@@ -16,6 +16,7 @@ model User {
   email     String     @unique
   password  String
   employees Employee[]
+  Chart     Chart[]
   updatedAt DateTime   @updatedAt
   createdAt DateTime   @default(now())
 }
@@ -35,4 +36,14 @@ model Employee {
   isDeleted      Boolean  @default(false)
   updatedAt      DateTime @updatedAt
   createdAt      DateTime @default(now())
+}
+
+model Chart {
+  id        Int      @id @default(autoincrement())
+  userId    String   @db.Uuid
+  user      User     @relation(fields: [userId], references: [id])
+  type      Int      @db.SmallInt
+  isDeleted Boolean  @default(false)
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
 }
