@@ -3,6 +3,7 @@ const prisma = require('../../prisma');
 const { HTTPError } = require('../error');
 const { compareSync, hashSync } = require('bcrypt');
 const { sign } = require('jsonwebtoken');
+const { Workbook } = require('exceljs');
 
 exports.login = async function (req, res, next) {
   try {
@@ -21,7 +22,6 @@ exports.signup = async function (req, res, next) {
     delete create?.password;
     return res.json({
       data: create,
-      accessToken,
       message: 'User profile created.',
     });
   } catch (e) {
@@ -71,7 +71,7 @@ async function validatePayload(payload, isSignUp) {
   if (!compare) throw new HTTPError({ message: 'Wrong Credentials' });
   const accessToken = getToken(user);
   delete user?.password;
-  return { accessToken, user };
+  return { accessToken, ...user };
 }
 
 function getToken(user) {
@@ -79,3 +79,18 @@ function getToken(user) {
     expiresIn: '2 days',
   });
 }
+
+exports.upload = async (req, res, next) => {
+  try {
+    const file = req.files.file;
+    if (!file.path.endsWith('.xlsx') && !file.path.endsWith('.csv'))
+      throw new HTTPError({
+        message: 'File not valid',
+        statusCode: 400,
+      });
+    const workbook = new Workbook();
+    await workbook.xlsx.readFile(file);
+  } catch (e) {
+    next(e);
+  }
+};

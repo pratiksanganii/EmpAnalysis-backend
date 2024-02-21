@@ -32,6 +32,7 @@ model Employee {
   skills         String[]
   salaryDetails  Json
   address        String
+  isDeleted      Boolean  @default(false)
   updatedAt      DateTime @updatedAt
   createdAt      DateTime @default(now())
 }

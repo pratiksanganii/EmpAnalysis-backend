@@ -1,9 +1,6 @@
-exports.HTTPError = function (
-  { message, statusCode, param } = {
-    message: 'Internal Error',
-    statusCode: 500,
-  }
-) {
+exports.HTTPError = function ({ message, statusCode, param }) {
+  message = message ?? 'Internal Error';
+  statusCode = statusCode ?? 500;
   if (param) {
     statusCode = 400;
     message = `Provide valid ${param}`;
