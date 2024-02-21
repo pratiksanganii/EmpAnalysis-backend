@@ -43,6 +43,7 @@ model Chart {
   userId    String   @db.Uuid
   user      User     @relation(fields: [userId], references: [id])
   type      Int      @db.SmallInt
+  field     String   @db.VarChar()
   isDeleted Boolean  @default(false)
   updatedAt DateTime @updatedAt
   createdAt DateTime @default(now())
