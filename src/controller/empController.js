@@ -1,5 +1,6 @@
 const { HTTPError } = require('../error');
 const prisma = require('../../prisma');
+const { empData } = require('../globals');
 
 exports.create = async (req, res, next) => {
   try {
@@ -66,7 +67,18 @@ async function checkPayload(body, type, userId) {
   const tempObj = { userId };
   if (body?.employeeID) tempObj['employeeID'] = body?.employeeID;
   if (body?.employeeName) tempObj['employeeName'] = body?.employeeName;
-  if (body?.employeeStatus) tempObj['employeeStatus'] = body?.employeeStatus;
+  // validate employee status
+  if (body?.employeeStatus)
+    if (!empData.status.includes(body?.employeeStatus))
+      throw new HTTPError({ param: 'employeeStatus' });
+    else tempObj['employeeStatus'] = body?.employeeStatus;
+
+  // validate designation
+  if (body?.designation)
+    if (!empData.designation.includes(body?.designation))
+      throw new HTTPError({ param: 'designation' });
+    else tempObj['designation'] = body?.designation;
+
   if (body?.joiningDate) tempObj['joiningDate'] = body?.joiningDate;
   if (body?.birthDate) tempObj['birthDate'] = body?.birthDate;
   if (body?.skills) tempObj['skills'] = body?.skills?.split(',');

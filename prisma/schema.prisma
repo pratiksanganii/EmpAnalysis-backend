@@ -28,10 +28,11 @@ model Employee {
   employeeID     String
   employeeName   String
   employeeStatus String
+  designation    String
   joiningDate    String
   birthDate      String
   skills         String[]
-  salaryDetails  Json
+  salary         Decimal  @db.Decimal()
   address        String
   isDeleted      Boolean  @default(false)
   updatedAt      DateTime @updatedAt

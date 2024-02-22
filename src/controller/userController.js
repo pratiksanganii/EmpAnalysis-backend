@@ -4,6 +4,7 @@ const { HTTPError } = require('../error');
 const { compareSync, hashSync } = require('bcrypt');
 const { sign } = require('jsonwebtoken');
 const { Workbook } = require('exceljs');
+const { writeFileSync } = require('fs');
 
 exports.login = async function (req, res, next) {
   try {
@@ -82,15 +83,68 @@ function getToken(user) {
 
 exports.upload = async (req, res, next) => {
   try {
-    const file = req.files.file;
-    if (!file.path.endsWith('.xlsx') && !file.path.endsWith('.csv'))
+    const file = req?.file;
+    if (
+      !file.originalname.endsWith('.xlsx') &&
+      !file.originalname.endsWith('.csv')
+    )
       throw new HTTPError({
         message: 'File not valid',
         statusCode: 400,
       });
     const workbook = new Workbook();
-    await workbook.xlsx.readFile(file);
+    const path = `upload/${new Date().getTime()}.xlsx`;
+    writeFileSync(path, file.buffer);
+    await workbook.xlsx.readFile(path);
+    // get worksheet
+    let worksheet = workbook.getWorksheet(1);
+    if (!worksheet) worksheet = workbook.getWorksheet();
+    const finalizedArray = [];
+    const keyArr = [];
+
+    try {
+      // Get column names
+      worksheet.getRow(1).eachCell((cell, colNumber) => {
+        try {
+          const columnName = cell.value;
+          keyArr[colNumber] = columnName;
+        } catch (error) {}
+      });
+
+      for (let rowNumber = 2; rowNumber <= worksheet.rowCount; rowNumber++) {
+        const row = worksheet.getRow(rowNumber);
+        const rowData = { userId: req.userId };
+        try {
+          row.eachCell((cell, colNumber) => {
+            const columnName = keyArr[colNumber];
+            if (columnName == 'employeeID') cell.value = cell.value?.toString();
+            else if (['joiningDate', 'birthDate'].includes(columnName))
+              cell.value = new Date(cell.value).toDateString();
+            if (columnName == 'skills')
+              cell.value = cell.value
+                .split(',')
+                .filter((e) => !(e !== ' ' && !e));
+            rowData[columnName] = cell.value;
+          });
+
+          finalizedArray.push(rowData);
+        } catch (error) {}
+      }
+    } catch (e) {}
+    await prisma.employee.createMany({ data: finalizedArray });
+    return res.json(finalizedArray);
   } catch (e) {
+    console.log({ e });
     next(e);
+  }
+};
+
+exports.getUser = async (req, res, next) => {
+  try {
+    const user = await prisma.user.findFirst({ where: { id: req.userId } });
+    delete user?.password;
+    return res.json(user);
+  } catch (e) {
+    throw new HTTPError({});
   }
 };
