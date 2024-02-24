@@ -15,7 +15,7 @@ exports.errorHandler = (err, req, res, next) => {
     if (data.statusCode) res.statusCode = data.statusCode;
     return res.json(data);
   } catch (e) {
-    console.log({ e, url: req.url });
+    console.log({ e, url: req.url, err });
     res.statusCode = 500;
     return res.json({ message: 'Internal Error' });
   }

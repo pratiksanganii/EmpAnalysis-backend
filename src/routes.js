@@ -4,6 +4,7 @@ const chartController = require('./controller/chartController');
 const miscController = require('./controller/miscController');
 const { authUser } = require('./middleware');
 const multer = require('multer');
+const { errorHandler } = require('./error');
 
 const router = require('express').Router();
 
@@ -31,4 +32,6 @@ router.post('/chart/update', chartController.update);
 router.post('/chart/delete', chartController.delete);
 
 router.get('/misc/empData', miscController.getEmpData);
+
+router.use(errorHandler);
 module.exports = router;

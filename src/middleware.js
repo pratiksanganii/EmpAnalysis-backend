@@ -9,6 +9,6 @@ exports.authUser = async function (req, res, next) {
     req.userId = user.id;
     next();
   } catch (e) {
-    throw new HTTPError({ message: 'Authentication failed!', statusCode: 403 });
+    next( new HTTPError({ message: 'Authentication failed!', statusCode: 403 }))
   }
 };

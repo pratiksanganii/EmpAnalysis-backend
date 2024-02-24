@@ -47,6 +47,9 @@ exports.list = async (req, res, next) => {
     });
     data.forEach((d) => {
       d.skills = d.skills.join(',');
+      if (d.birthDate) d.birthDate = new Date(d.birthDate).toLocaleDateString();
+      if (d.joiningDate)
+        d.joiningDate = new Date(d.joiningDate).toLocaleDateString();
     });
     return res.json(data);
   } catch (e) {
