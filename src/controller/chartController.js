@@ -37,7 +37,7 @@ exports.data = async (req, res, next) => {
       where: { userId, isDeleted: false },
       select: { id: true, type: true, field: true },
     });
-    await getChartData(data, userId);
+    if (data.length) await getChartData(data, userId);
     return res.json(data);
   } catch (e) {
     next(e);
